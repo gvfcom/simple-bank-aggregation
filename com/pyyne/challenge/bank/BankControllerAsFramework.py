@@ -1,16 +1,15 @@
-# com/pyyne/challenge/bank/BankController.java
-# Controller that pulls information form multiple bank integrations and prints them to the console.
-# Created by Par Renyard on 5/12/21.
-
 import os, sys; parent_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../../..')); sys.path.append(parent_dir)
 import datetime
 from com.bank1.integration.Bank1AccountSource import Bank1AccountSource
 from com.bank2.integration.Bank2AccountSource import Bank2AccountSource
 from BankAdapter import Bank1Adapter, Bank2Adapter
 
-def print_balances() -> None:
+import streamlit as st
+import pandas as pd
+
+def get_balances() -> pd.DataFrame():
     """
-    Print the account balances from all available bank integrations.
+    Get the account balances from all available bank integrations.
     """
     bank1_account_source = Bank1AccountSource()
     bank2_account_source = Bank2AccountSource()
@@ -25,13 +24,24 @@ def print_balances() -> None:
     balance2 = adapter2.getAccountBalance(accountId=12345)
     currency2 = adapter2.getCurrency(accountId=12345)
 
-    # Print the balances
-    print(f"Bank 1 | Account ID: 12345 | Balance: {balance1} | Currency: {currency1}")
-    print(f"Bank 2 | Account ID: 12345 | Balance: {balance2} | Currency: {currency2}")
+    # Return the balances
+    return_dict = {
+        "Bank": ["Bank 1", "Bank 2"],
+        "Account ID": [12345, 12345],
+        "Balance": [balance1, balance2],
+        "Currency": [currency1, currency2]
+    }
+    
+    df_return = pd.DataFrame(
+        return_dict,
+        columns=return_dict.keys()
+    )
 
-def print_transactions() -> None:
+    return df_return
+
+def get_transactions() -> pd.DataFrame():
     """
-    Print the transactions from all available bank integrations.
+    Get the transactions from all available bank integrations.
     """
     bank1_account_source = Bank1AccountSource()
     bank2_account_source = Bank2AccountSource()
@@ -45,17 +55,42 @@ def print_transactions() -> None:
         accountId=12345, from_date=datetime.date(2023, 6, 1), to_date=datetime.date(2023, 6, 30)
     )
     
+    return_dict = {
+        "Bank": [],
+        "Account ID": [],
+        "Amount": [],
+        "Type": [],
+        "Text": []
+    }
     for transaction in bank1_transactions:
-        print(f"Bank 1 | Account ID: 12345 | Amount: {transaction.getAmount()} | Type: {transaction.getType()} | Text: {transaction.getText()}")
+        return_dict["Bank"].append("Bank 1")
+        return_dict["Account ID"].append(12345)
+        return_dict["Amount"].append(transaction.getAmount())
+        return_dict["Type"].append(transaction.getType())
+        return_dict["Text"].append(transaction.getText())
 
     bank2_transactions = adapter2.getTransactions(
         accountId=12345, from_date=datetime.date(2023, 6, 1), to_date=datetime.date(2023, 6, 30)
     )
 
     for transaction in bank2_transactions:
-        print(f"Bank 2 | Account ID: 12345 | Amount: {transaction.getAmount()} | Type: {transaction.getType()} | Text: {transaction.getText()}")
+        return_dict["Bank"].append("Bank 2")
+        return_dict["Account ID"].append(12345)
+        return_dict["Amount"].append(transaction.getAmount())
+        return_dict["Type"].append(transaction.getType())
+        return_dict["Text"].append(transaction.getText())
+    
+    # Return the balances
+    df_return = pd.DataFrame(
+        return_dict,
+        columns=return_dict.keys()
+    )
 
-# Print balances and transactions
+    return df_return
+
 if __name__ == '__main__':
-    print_balances()
-    print_transactions()
+    st.write("# Simple Bank Aggregation App")
+    st.write("## Balances")
+    st.table(get_balances())
+    st.write("## Transactions")
+    st.table(get_transactions())
