@@ -3,32 +3,11 @@
 
 class Bank2AccountBalance:
     def __init__(self, balance: float, currency: str) -> None:
-        """
-        Bank2AccountBalance constructor.
-
-        Args:
-            balance (float): The account balance amount.
-            currency (str): The currency of the account balance.
-        """
         self._balance = balance
         self._currency = currency
 
-    @property
-    def balance(self) -> float:
-        """
-        Get the account balance.
-
-        Returns:
-            float: The account balance.
-        """
+    def getBalance(self) -> float:
         return self._balance
 
-    @property
-    def currency(self) -> str:
-        """
-        Get the account currency.
-
-        Returns:
-            str: The account currency.
-        """
+    def getCurrency(self) -> str:
         return self._currency
